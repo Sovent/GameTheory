@@ -5,7 +5,7 @@ contract("Currency", (accounts) => {
     const nonOwnerAccount = accounts[1];
     const fraudster = accounts[2];
     beforeEach(async () => {
-        instance = await Currency.deployed();
+        instance = await Currency.new();
     });
 
     it("creates contract with the proper owner", async () => {
@@ -29,5 +29,12 @@ contract("Currency", (accounts) => {
 
         let newBalance = (await instance.balanceOf(fraudster)).toNumber();
         assert.equal(newBalance, 0, "Account shouldn't have been rewarded");
+    });
+
+    it("can transfer currency rewarded to it", async () => {
+        await instance.reward(ownerAccount, 300);
+        await instance.transfer(nonOwnerAccount, 250);
+        let newBalance = (await instance.balanceOf(nonOwnerAccount)).toNumber();
+        assert.equal(newBalance, 250, "Coins should be transfered");
     });
 });
