@@ -5,7 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract Cards is ERC721, ERC721Enumerable {
+import "./CardCatalogue.sol";
+
+contract Cards is CardCatalogue, ERC721, ERC721Enumerable {
     constructor() ERC721("Game Theory Card", "GTC") {
 
     }
@@ -34,6 +36,7 @@ contract Cards is ERC721, ERC721Enumerable {
     }
 
     function createCardOfType(uint cardType) public returns(uint) {
+        require(doesCardTypeExists(cardType), "Trying to create a card of non-existing type");
         uint tokenId = _tokenIdCounter.current();
         _mint(msg.sender, tokenId);
         cardToCardTypes[tokenId] = cardType;

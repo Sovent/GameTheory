@@ -12,10 +12,12 @@ contract("Market", (accounts) => {
         currencyInstance = await Currency.new();
         cardsInstance = await Cards.new();
         marketInstance = await Market.new(cardsInstance.address, currencyInstance.address);
+        await cardsInstance.addNewCardType("Pretty lady");
+        cardType = await unwrapUint(cardsInstance.getLastAddedCardType());
     });
 
     it("can add cards to market", async () => {
-        const id = await marketInstance.addCard(5);
+        const id = await marketInstance.addCard(cardType);
         const cards = await marketInstance.getCardsInStorage();
         assert.equal(cards.length, 1);
     });
@@ -37,17 +39,16 @@ contract("Market", (accounts) => {
     it("can buy cards", async () => {
         await currencyInstance.reward(accounts[0], 200);
         await currencyInstance.approve(marketInstance.address, 200);
-        for (let cardType = 0; cardType < 10; cardType++) {
+        for (let i = 0; i < 10; i++) {
             await marketInstance.addCard(cardType);
         }
 
         await marketInstance.buySmallBooster();
 
-        cardsInStorage = await unwrapUint(marketInstance.getCardsInStorage());
-        console.log("get cards in storage after booster purchase", cardsInStorage);
+        const cardsInStorage = await unwrapUint(marketInstance.getCardsInStorage());
         
         const cards = await unwrapUint(cardsInstance.getCards(accounts[0]));
         assert.equal(5, cards.length);
-        console.log("cardIds", cards);
+        assert.equal(5, cardsInStorage.length);
     });
 });
